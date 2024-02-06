@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="file" id="foto" onchange="getPath()" accept="image/*">
+
+
+    <script>
+        function getPath(){
+            var input = document.getElementById('foto');
+     
+            if (input.files.length > 0) {
+                var filePath = input.files[0];
+                upload(filePath)                
+            } 
+        }
+
+        function upload(file){
+            var formData = new FormData();
+            formData.append('image', file);
+
+            fetch('https://api.imgur.com/3/image', {
+            method: 'POST',
+            headers: {
+                Authorization: "Client-ID dcbc7ee20f79e14"
+            },
+            body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+            console.log('Link da imagem no Imgur:', data.data.link);
+            alert('Imagem enviada com sucesso! Link: ' + data.data.link);
+            })
+            .catch(error => {
+            console.error('Erro no upload para o Imgur:', error);
+            });
+
+        }
+    </script>
+</body>
+</html>
