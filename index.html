@@ -1,45 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Fazer upload de imagens Imgur</title>
 </head>
+
 <body>
-    <input type="file" id="foto" onchange="getPath()" accept="image/*">
+    <div>
+        <input type="file" id="foto" onchange="getPath()" accept="image/*">
+        <label id="path-imgur"></label>
+
+        <hr>
+        <img src="#" id="imgur-img" width="100" height="100" referrerpolicy="no-referrer" />
+    </div>
+
 
 
     <script>
-        function getPath(){
+        function getPath() {
             var input = document.getElementById('foto');
-     
             if (input.files.length > 0) {
                 var filePath = input.files[0];
-                upload(filePath)                
-            } 
+                upload(filePath)
+            }
         }
 
-        function upload(file){
-            var formData = new FormData();
-            formData.append('image', file);
+        async function upload(file) {
+            try {
+                var formData = new FormData();
+                formData.append('image', file);
 
-            fetch('https://api.imgur.com/3/image', {
-            method: 'POST',
-            headers: {
-                Authorization: "Client-ID dcbc7ee20f79e14"
-            },
-            body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-            console.log('Link da imagem no Imgur:', data.data.link);
-            alert('Imagem enviada com sucesso! Link: ' + data.data.link);
-            })
-            .catch(error => {
-            console.error('Erro no upload para o Imgur:', error);
-            });
+                var client_id = localStorage.getItem("client-id-imgur")
+                if(client_id == null){
+                    throw new Error('Usuário não autenticado')
+                }
 
+                var headers = new Headers();
+                headers.append('Authorization', `Client-ID ${client_id}`)
+                // headers.append('Content-Type', 'multipart/form-data')
+
+                var response = await fetch('https://api.imgur.com/3/image', {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData,
+                })
+
+                var data = await response.json()
+                document.getElementById("imgur-img").src = data.data.link
+                document.getElementById("path-imgur").innerHTML = data.data.link
+            }
+            catch (error) {
+                document.getElementById("path-imgur").innerHTML = error
+            }
         }
     </script>
 </body>
+
 </html>
